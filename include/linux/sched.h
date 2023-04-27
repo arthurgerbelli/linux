@@ -36,6 +36,10 @@
 #include <linux/kcsan.h>
 #include <asm/kmap_size.h>
 
+#ifdef CONFIG_MOKER_SCHED_LIFO_POLICY
+#include "../../kernel/moker/lf_task.h"
+#endif
+
 /* task_struct member predeclarations (sorted alphabetically): */
 struct audit_context;
 struct backing_dev_info;
@@ -778,6 +782,10 @@ struct task_struct {
 	struct sched_rt_entity		rt;
 	struct sched_dl_entity		dl;
 	const struct sched_class	*sched_class;
+
+#ifdef CONFIG_MOKER_SCHED_LIFO_POLICY
+	struct sched_lf_entity lf;
+#endif
 
 #ifdef CONFIG_SCHED_CORE
 	struct rb_node			core_node;
@@ -1813,7 +1821,7 @@ current_restore_flags(unsigned long orig_flags, unsigned long flags)
 }
 
 extern int cpuset_cpumask_can_shrink(const struct cpumask *cur, const struct cpumask *trial);
-extern int task_can_attach(struct task_struct *p, const struct cpumask *cs_cpus_allowed);
+extern int task_can_attach(struct task_struct *p, const struct cpumask *cs_effective_cpus);
 #ifdef CONFIG_SMP
 extern void do_set_cpus_allowed(struct task_struct *p, const struct cpumask *new_mask);
 extern int set_cpus_allowed_ptr(struct task_struct *p, const struct cpumask *new_mask);
